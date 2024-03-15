@@ -1053,7 +1053,9 @@ class Plug_v2(EnchantedDevice):
     quirk_id = TUYA_PLUG_ONOFF
 
     signature = {
-        MODEL: "TS011F",
+        MODEL: [
+            ("_TZ3000_okaz9tjs", "TS011F")
+        ],
         ENDPOINTS: {
             # "profile_id": 260,
             # "device_type": "0x0051",
