@@ -327,7 +327,7 @@ class TuyaSmartRemote004FSK(EnchantedDevice):
         # SizePrefixedSimpleDescriptor(endpoint=1, profile=260, device_type=260, device_version=1, input_clusters=[0, 1, 3, 4, 6, 4096, 57345], output_clusters=[25, 10, 3, 4, 6, 8, 4096])
         MODELS_INFO: [
             ("_TZ3000_kjfzuycl", "TS004F"),
-            ("_TZ3000_ja5osu5g", "TS004F"),
+        #    ("_TZ3000_ja5osu5g", "TS004F"),
         ],
         ENDPOINTS: {
             1: {
