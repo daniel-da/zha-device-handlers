@@ -958,6 +958,18 @@ class TuyaPowerConfigurationCluster2AAA(PowerConfiguration, TuyaLocalCluster):
         BATTERY_RATED_VOLTAGE: 15,
     }
 
+class TuyaPowerConfigurationCluster3AAA(PowerConfiguration, TuyaLocalCluster):
+    """PowerConfiguration cluster for devices with 2 AAA."""
+
+    BATTERY_SIZES = 0x0031
+    BATTERY_QUANTITY = 0x0033
+    BATTERY_RATED_VOLTAGE = 0x0034
+
+    _CONSTANT_ATTRIBUTES = {
+        BATTERY_SIZES: 4,
+        BATTERY_QUANTITY: 2,
+        BATTERY_RATED_VOLTAGE: 15,
+    }
 
 class TuyaPowerConfigurationCluster2AA(TuyaPowerConfigurationCluster):
     """PowerConfiguration cluster for devices with 2 AA."""
@@ -1569,6 +1581,9 @@ class TuyaNewManufCluster(CustomCluster):
         """Handle cluster specific request."""
 
         try:
+            self.debug(
+                "Received known manufacturer command %s %s | %s: %s", hdr.direction, self.client_commands[hdr.command_id].name, hdr.command_id, args
+            )
             if hdr.direction == foundation.Direction.Server_to_Client:
                 # server_cluster -> client_cluster cluster specific command
                 handler_name = f"handle_{self.client_commands[hdr.command_id].name}"
