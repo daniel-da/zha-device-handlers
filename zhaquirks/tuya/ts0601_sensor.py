@@ -12,7 +12,7 @@ from typing import Tuple, Optional, Union
 
 from zigpy.profiles import zha
 from zigpy.quirks import CustomDevice
-from zigpy.zcl.clusters.general import Basic, Groups, Ota, Scenes, Time
+from zigpy.zcl.clusters.general import Basic, Groups, Ota, Scenes, Time, Identify
 from zigpy.zcl.clusters.measurement import (
     RelativeHumidity,
     SoilMoisture,
@@ -35,6 +35,17 @@ from zhaquirks.tuya.mcu import DPToAttributeMapping, TuyaMCUCluster
 class TuyaTemperatureMeasurement(TemperatureMeasurement, TuyaLocalCluster):
     """Tuya local TemperatureMeasurement cluster."""
 
+class TuyaTemperatureMeasurementD(TemperatureMeasurement, TuyaLocalCluster):
+    """Tuya local TemperatureMeasurement cluster."""
+
+    def update_attribute(self, attr_name: str, value: Any) -> None:
+        """Apply a correction factor to value."""
+
+        self.debug("DANY3: %s, %s", attr_name, value)
+        if attr_name == "measured_value":
+            value = 1500
+        
+        return super().update_attribute(attr_name, value)
 
 class TuyaSoilMoisture(SoilMoisture, TuyaLocalCluster):
     """Tuya local SoilMoisture cluster with a device RH_MULTIPLIER factor if required."""
@@ -203,7 +214,6 @@ class TuyaTempHumiditySensor_Square(CustomDevice):
 
     signature = {
         MODELS_INFO: [
-            ("_TZE200_a8sdabtg", "TS0601"),  # Variant without screen, round
             ("_TZE200_qoy0ekbd", "TS0601"),
             ("_TZE200_znbl8dj5", "TS0601"),
         ],
@@ -523,6 +533,53 @@ class TuyaSoilSensor(CustomDevice):
                     TuyaPowerConfigurationCluster2AAA,
                 ],
                 OUTPUT_CLUSTERS: [Ota.cluster_id, Time.cluster_id],
+            }
+        },
+    }
+
+
+
+class TuyaTempHumiditySensorVar06(CustomDevice):
+    """Tuya temp and humidity sensor (variation 06)."""
+
+    signature = {
+        # "profile_id": 260,
+        # "device_type": "0x0update_attribute051",
+        # "in_clusters": ["0x0000","0x0001","0x0003","0x0402","0x0405"],
+        # "out_clusters": ["0x0003"]
+        MODELS_INFO: [
+            ("_TZE200_a8sdabtg", "TS0601"),
+        ],
+        ENDPOINTS: {
+            1: {
+                PROFILE_ID: zha.PROFILE_ID,
+                DEVICE_TYPE: zha.DeviceType.TEMPERATURE_SENSOR,
+                INPUT_CLUSTERS: [
+                    Basic.cluster_id, # 0x0000
+                    TuyaPowerConfigurationCluster2AAA.cluster_id, # 0x0001
+                    Identify.cluster_id, # 0x0003
+                    TemperatureMeasurement.cluster_id, # 0x0402
+                    RelativeHumidity.cluster_id, # 0x0405
+                ],
+                OUTPUT_CLUSTERS: [Identify.cluster_id],
+            }
+        },
+    }
+
+    replacement = {
+        SKIP_CONFIGURATION: True,
+        ENDPOINTS: {
+            1: {
+                DEVICE_TYPE: zha.DeviceType.TEMPERATURE_SENSOR,
+                INPUT_CLUSTERS: [
+                    Basic.cluster_id,
+                    TuyaPowerConfigurationCluster2AAA,
+                    Identify.cluster_id, # 0x0003
+                    #TemperatureHumidityManufCluster,
+                    TuyaTemperatureMeasurementD,
+                    TuyaRelativeHumidity,
+                ],
+                OUTPUT_CLUSTERS: [Identify.cluster_id],
             }
         },
     }
